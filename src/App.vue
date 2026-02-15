@@ -6,13 +6,17 @@ const _match = ref<string>("");
 const _selected = ref<string | null>(null);
 const _digits = computed(() => [0].concat(_selected.value.split("").map((_, index) => index + 1)));
 
+
+const canInsertWord = () =>
+	_match.value !== "";
+
 const insertWord = () => {
+	if (!canInsertWord())
+		return;
+
 	const match = _match.value.toUpperCase();
-
-	if (_match.value === "") return;
-	if (_words.value.includes(match)) return;
-
-	_words.value.push(match);
+	if (!_words.value.includes(match))
+		_words.value.push(match);
 	_match.value = "";
 }
 
@@ -45,10 +49,7 @@ const filterWords = (similarity: number) => {
 				@keypress="({ key }) => key == 'Enter' && insertWord()"
 				v-model="_match"
 			/>
-			<Button
-				@click="insertWord"
-				label="+"
-			/>
+			<Button @click="insertWord" :disabled="!canInsertWord()" icon="pi pi-plus" />
 		</div>
 	</div>
 	<Dialog
@@ -64,7 +65,7 @@ const filterWords = (similarity: number) => {
 				:options="_digits"
 				@update:modelValue="filterWords"
 			/>
-			<Button severity="danger" label="x" @click="deleteWord" />
+			<Button @click="deleteWord" severity="danger" icon="pi pi-trash" />
 		</template>
 	</Dialog>
 </template>
@@ -104,9 +105,5 @@ const filterWords = (similarity: number) => {
 .input-group > input {
 	flex: 1 1 0;
 	min-width: 0;
-}
-
-.input-group > button {
-	flex: 0 0 3rem;
 }
 </style>
